@@ -1,0 +1,15 @@
+requests
+pandas
+numpy
+matplotlib
+statsmodels
+pmdarima
+prophet
+tensorflow
+scikit-learn
+openmeteo-requests
+equests-cache
+retry-requests
+fastapi
+uvicorn
+streamlit
