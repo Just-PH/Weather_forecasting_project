@@ -1,0 +1,14 @@
+# Ignorer les fichiers de logs
+*.log
+logs/
+
+# Ignorer les fichiers d'environnement
+.env
+.python-version
+
+# Ignorer les fichiers de base de données
+*.sqlite3
+
+# Ignorer les fichiers de cache
+__pycache__/
+*.pyc
