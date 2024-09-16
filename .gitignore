@@ -5,7 +5,7 @@ logs/
 # Ignorer les fichiers d'environnement
 .env
 .python-version
-
+*.ipynb
 # Ignorer les fichiers de base de données
 *.sqlite3
 

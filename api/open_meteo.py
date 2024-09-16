@@ -1,4 +1,3 @@
-# api/open_meteo.py
 import requests
 
 def get_temperature(lat, lon):
@@ -8,4 +7,8 @@ def get_temperature(lat, lon):
         data = response.json()
         return data['current_weather']['temperature']
     else:
+        print(f"Erreur {response.status_code}")
         return None
+
+# if __name__:  # pragma: no cover
+#     print(get_temperature(48.8566, 2.3522))  # Exemple pour Paris
