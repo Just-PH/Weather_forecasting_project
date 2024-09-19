@@ -16,7 +16,7 @@ def get_coordinates(city_name, API_KEY = API_KEY):
         data = response.json()
         if data['results']:
             geometry = data['results'][0]['geometry']
-            return geometry['lat'], geometry['lng']  # Latitude et Longitude
+            return {'lat': geometry['lat'],'lng' : geometry['lng']}  # Latitude et Longitude
     return None, None
 
 # if __name__ == "__main__":

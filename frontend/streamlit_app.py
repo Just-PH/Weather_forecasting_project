@@ -3,6 +3,7 @@ from api.open_meteo import get_temperature
 from api.geocode import get_coordinates
 import base64
 import os
+import requests
 from io import BytesIO
 
 def add_bg_from_local(image_file):
@@ -58,14 +59,31 @@ def run_app():
     st.markdown('<h1 class="title">Météo du Jour </h1>', unsafe_allow_html=True)
     city_name = st.text_input("Entrez le nom de la ville", value="Paris")
 
+    # if st.button("Obtenir la température"):
+    #     lat, lon = get_coordinates(city_name)  # Obtenir la latitude et la longitude de la ville
+    #     if lat and lon:
+    #         st.write(f"Coordonnées trouvées : lat = {lat}, lon = {lon}")
+    #         temperature = get_temperature(lat, lon)
+    #         if temperature:
+    #             st.success(f"La température actuelle à {city_name} est de {temperature}°C")
+    #         else:
+    #             st.error("Impossible de récupérer la température.")
+    #     else:
+    #         st.error("Ville introuvable, veuillez essayer à nouveau.")
     if st.button("Obtenir la température"):
-        lat, lon = get_coordinates(city_name)  # Obtenir la latitude et la longitude de la ville
-        if lat and lon:
-            st.write(f"Coordonnées trouvées : lat = {lat}, lon = {lon}")
-            temperature = get_temperature(lat, lon)
-            if temperature:
-                st.success(f"La température actuelle à {city_name} est de {temperature}°C")
+        response = requests.get(f"http://127.0.0.1:8000/temperature/{city_name}")
+        if response.status_code == 200:
+            data = response.json()
+            lat = data.get('lat')
+            lng = data.get('lng')
+            temperature = data.get('temperature')
+            if lat and lng:
+                st.write(f"Coordonnées trouvées : latitude = {lat}°, longitude = {lng}°")
+                if temperature:
+                    st.success(f"La température actuelle à {city_name} est de {temperature}°C")
+                else:
+                    st.error("Impossible de récupérer la température.")
             else:
-                st.error("Impossible de récupérer la température.")
+                st.error("Ville introuvable, veuillez essayer à nouveau.")
         else:
-            st.error("Ville introuvable, veuillez essayer à nouveau.")
+            st.error("Erreur lors de la requête API.")
