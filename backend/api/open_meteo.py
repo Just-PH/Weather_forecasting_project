@@ -18,6 +18,6 @@ def get_history(lat,lng, start_date, end_date):
         print(f"Erreur {response.status_code}")
         return None
 
-if __name__:  # pragma: no cover
-    print(get_temperature(48.8566, 2.3522))  # Exemple pour Paris
-    print(get_history(48.8566, 2.3522, "2021-01-01", "2021-01-02"))  # Exemple pour Paris
+# if __name__:  # pragma: no cover
+#     print(get_temperature(48.8566, 2.3522))  # Exemple pour Paris
+#     print(get_history(48.8566, 2.3522, "2021-01-01", "2021-01-02"))  # Exemple pour Paris
