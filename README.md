@@ -1,6 +1,12 @@
 # Weather_forecasting_project
 Predict the weather of the day and compare it to other prediction
 
+# Setup
+
+You need to make a .env file containing your api key from open-meteo :
+```
+API_KEY_GEOCODE = ...
+```
 # Docker
 To build the image run :
 ```
