@@ -10,5 +10,5 @@ def get_temperature(lat, lng):
         print(f"Erreur {response.status_code}")
         return None
 
-if __name__:  # pragma: no cover
-    print(get_temperature(48.8566, 2.3522))  # Exemple pour Paris
+# if __name__:  # pragma: no cover
+#     print(get_temperature(48.8566, 2.3522))  # Exemple pour Paris

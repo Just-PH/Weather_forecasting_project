@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from api.geocode import get_coordinates
-from api.open_meteo import get_temperature
+from backend.api.geocode import get_coordinates
+from backend.api.open_meteo import get_temperature
 app = FastAPI()
 
 # define a root '/' endpoint

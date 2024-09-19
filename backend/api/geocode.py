@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # Charger les variables d'environnement à partir du fichier .env
-load_dotenv(dotenv_path='.env')
+load_dotenv()
 
 # Récupérer la clé API depuis le fichier .env
 API_KEY = os.getenv('API_KEY_GEOCODE')

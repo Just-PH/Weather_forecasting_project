@@ -1,15 +1,16 @@
+# pandas
+# numpy
+# matplotlib
+# statsmodels
+# pmdarima
+# prophet
+# tensorflow
+# scikit-learn
 requests
-pandas
-numpy
-matplotlib
-statsmodels
-pmdarima
-prophet
-tensorflow
-scikit-learn
 openmeteo-requests
-equests-cache
+requests-cache
 retry-requests
 fastapi
 uvicorn
 streamlit
+python-dotenv

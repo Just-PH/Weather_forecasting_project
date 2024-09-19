@@ -1,6 +1,6 @@
 import streamlit as st
-from api.open_meteo import get_temperature
-from api.geocode import get_coordinates
+from backend.api.open_meteo import get_temperature
+from backend.api.geocode import get_coordinates
 import base64
 import os
 import requests
