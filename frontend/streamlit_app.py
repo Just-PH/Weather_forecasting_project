@@ -1,10 +1,9 @@
 import streamlit as st
-from backend.api.open_meteo import get_temperature
-from backend.api.geocode import get_coordinates
 import base64
 import os
 import requests
-from io import BytesIO
+from datetime import datetime
+import pandas as pd  # Assurez-vous d'importer pandas
 
 def add_bg_from_local(image_file):
     with open(image_file, "rb") as image:
@@ -19,7 +18,6 @@ def add_bg_from_local(image_file):
         .title{{
             color: black;
         }}
-
         </style>
         """,
         unsafe_allow_html=True
@@ -49,8 +47,7 @@ def load_custom_css():
         unsafe_allow_html=True
     )
 
-def run_app():
-
+def run_app(url):
     # Adding a background image
     add_bg_from_local(os.path.join(os.getcwd(), 'images', 'background.jpeg'))
     load_custom_css()
@@ -59,31 +56,51 @@ def run_app():
     st.markdown('<h1 class="title">Météo du Jour </h1>', unsafe_allow_html=True)
     city_name = st.text_input("Entrez le nom de la ville", value="Paris")
 
-    # if st.button("Obtenir la température"):
-    #     lat, lon = get_coordinates(city_name)  # Obtenir la latitude et la longitude de la ville
-    #     if lat and lon:
-    #         st.write(f"Coordonnées trouvées : lat = {lat}, lon = {lon}")
-    #         temperature = get_temperature(lat, lon)
-    #         if temperature:
-    #             st.success(f"La température actuelle à {city_name} est de {temperature}°C")
-    #         else:
-    #             st.error("Impossible de récupérer la température.")
-    #     else:
-    #         st.error("Ville introuvable, veuillez essayer à nouveau.")
-    if st.button("Obtenir la température"):
-        response = requests.get(f"http://127.0.0.1:8000/temperature/{city_name}")
-        if response.status_code == 200:
-            data = response.json()
-            lat = data.get('lat')
-            lng = data.get('lng')
-            temperature = data.get('temperature')
-            if lat and lng:
-                st.write(f"Coordonnées trouvées : latitude = {lat}°, longitude = {lng}°")
-                if temperature:
-                    st.success(f"La température actuelle à {city_name} est de {temperature}°C")
+    # Gestion des résultats via session_state
+    if 'temperature_result' not in st.session_state:
+        st.session_state.temperature_result = None
+    if 'prediction_result' not in st.session_state:
+        st.session_state.prediction_result = None
+
+    # Ajouter les boutons sur la même ligne avec `st.columns`
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Température du jour"):
+            response = requests.get(f"{url}/temperature/{city_name}")
+            if response.status_code == 200:
+                data = response.json()
+                lat = data.get('lat')
+                lng = data.get('lng')
+                temperature = data.get('temperature')
+                if lat and lng:
+                    st.session_state.temperature_result = f"La température actuelle à {city_name} est de {temperature}°C"
                 else:
-                    st.error("Impossible de récupérer la température.")
+                    st.session_state.temperature_result = "Ville introuvable, veuillez essayer à nouveau."
             else:
-                st.error("Ville introuvable, veuillez essayer à nouveau.")
-        else:
-            st.error("Erreur lors de la requête API.")
+                st.session_state.temperature_result = "Erreur lors de la requête API."
+
+    with col2:
+        if st.button("Prévisions de température du jour"):
+            response = requests.get(f"{url}/predict_temperature/{city_name}")
+            if response.status_code == 200:
+                data = response.json()
+                prediction = {datetime.strptime(k, '%Y-%m-%dT%H:%M:%S').strftime('%H:%M'): v for k, v in data.items()}
+                st.session_state.prediction_result = prediction
+            else:
+                st.session_state.prediction_result = "Erreur lors de la requête API pour la prédiction."
+
+    # Afficher les résultats sous les boutons
+    with col1:
+        if st.session_state.temperature_result:
+            st.write(st.session_state.temperature_result)
+
+    with col2:
+        if st.session_state.prediction_result:
+            if isinstance(st.session_state.prediction_result, dict):
+                # Convertir le dictionnaire en DataFrame
+                df = pd.DataFrame(list(st.session_state.prediction_result.items()), columns=['Heure', 'Température (°C)']).set_index('Heure')
+                st.write(f"Prédictions pour {city_name} :")
+                st.dataframe(df)  # Afficher le tableau
+            else:
+                st.error(st.session_state.prediction_result)

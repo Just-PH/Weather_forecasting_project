@@ -6,9 +6,10 @@ def get_temperature(lat, lng):
         lat (float): The latitude of the location.
         lng (float): The longitude of the location.
     Returns:
-        float: The current temperature at the specified location if the request is successful.
-        None: If the request fails, returns None and prints an error message with the status code.
+        float: The current temperature in degrees Celsius if the request is successful.
+        None: If the request fails or an error occurs.
     """
+
 
     url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true"
     response = requests.get(url)

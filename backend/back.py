@@ -35,7 +35,7 @@ def temperature(city: str):
     return data
 
 @app.get("/predict_temperature/{city}")
-def prediction(city: str):
+def predict_temperature(city: str):
     """
     Predicts the temperature for a given city using historical weather data and a pre-trained LSTM model.
     Args:
@@ -65,4 +65,4 @@ def prediction(city: str):
     forecast = predict_from_model(df, model, scaler)
     forecast = forecast[-24:]
     forecast['predicted_temperature'] = forecast['predicted_temperature'].apply(lambda x: round(x, 1))
-    return forecast.to_dict(orient="records")
+    return forecast.set_index('date')['predicted_temperature'].to_dict()
