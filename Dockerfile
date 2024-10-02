@@ -5,5 +5,5 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 ENV PYTHONPATH=/app
-EXPOSE 8000
-CMD ["uvicorn", "backend.back:app", "--port", "8000", "--host", "0.0.0.0"]
+EXPOSE 8080
+CMD ["uvicorn", "backend.back:app", "--port", "8080", "--host", "0.0.0.0"]

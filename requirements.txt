@@ -1,11 +1,7 @@
 pandas
-# numpy
-# matplotlib
-# statsmodels
-# pmdarima
-# prophet
-# tensorflow
-# scikit-learn
+numpy
+tensorflow
+scikit-learn
 requests
 openmeteo-requests
 requests-cache
@@ -15,3 +11,7 @@ uvicorn
 streamlit
 python-dotenv
 plotly
+# matplotlib
+# statsmodels
+# pmdarima
+# prophet
