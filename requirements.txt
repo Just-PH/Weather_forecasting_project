@@ -1,4 +1,4 @@
-# pandas
+pandas
 # numpy
 # matplotlib
 # statsmodels
@@ -14,3 +14,4 @@ fastapi
 uvicorn
 streamlit
 python-dotenv
+plotly
