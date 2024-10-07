@@ -12,16 +12,17 @@ logs/
 # Ignorer les fichiers de cache
 __pycache__/
 *.pyc
+
 # dependencies
-weather-forecast-frontend/node_modules/
-/.pnp
+weather-forecast-frontend/node_modules
+weather-forecast-frontend/.pnp
 .pnp.js
 
 # testing
-/coverage
+weather-forecast-frontend/coverage
 
 # production
-/build
+weather-forecast-frontend/build
 
 # misc
 .DS_Store
