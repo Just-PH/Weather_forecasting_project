@@ -3,6 +3,7 @@
 logs/
 
 # Ignorer les fichiers d'environnement
+weather-forecast-frontend/.env
 .env
 .python-version
 *.ipynb
