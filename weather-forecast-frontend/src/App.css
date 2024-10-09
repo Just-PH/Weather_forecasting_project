@@ -1,7 +1,64 @@
 .App {
   text-align: center;
+  background-color: black;
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
+input, button {
+  margin: 10px;
+  padding: 10px;
+  font-size: 16px;
+  color: black;
+}
+
+button {
+  background-color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ccc;
+}
+
+input {
+  border: 1px solid white;
+}
+
+h1, h2 {
+  color: white;
+}
+
+.chart-container {
+  width: 600px;   /* fixe la largeur */
+  height: 400px;  /* fixe la hauteur */
+  max-width: 100%; /* pour s'assurer que la taille reste adaptée */
+  margin: 0 auto;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.column-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  padding-top: 20px;
+}
+.column {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
