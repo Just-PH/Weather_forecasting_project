@@ -2,9 +2,12 @@
 *.log
 logs/
 
+#Ignorer les Makefile
+**/Makefile
+Makefile
+
 # Ignorer les fichiers d'environnement
 weather-forecast-frontend/.env
-weather-forecast-frontend/Makefile
 .env
 .python-version
 *.ipynb
