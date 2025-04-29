@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 from backend.api.geocode import get_coordinates
 from backend.api.open_meteo import get_temperature, get_history
 from backend.model.LSTM_functions import fit_LSTM_model, predict_from_model, load_LSTM_model, retrain_and_compare_LSTM
@@ -7,9 +6,12 @@ import pandas as pd
 import numpy as np
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends
 
 app = FastAPI()
+SECRET_TOKEN = os.getenv("RETRAIN_TOKEN", "dev_token")
 
 app.add_middleware(
     CORSMiddleware,
@@ -100,8 +102,21 @@ def predict_temperature(city: str):
 
     return forecast.set_index('date')['predicted_temperature'].to_dict()
 
+
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    if token != "mon_token_ultra_secret":
+        raise HTTPException(status_code=401, detail="Invalid or missing token")
+
+
 @app.post("/update_model")
-def update_model_endpoint(city: str, model_name: str = None):
+def update_model_endpoint(
+    city: str,
+    model_name: str = None,
+    credentials: HTTPAuthorizationCredentials = Depends(security) # ← récupère le header 'Authorization'
+):
     """
     Updates the LSTM model by retraining it with new historical data.
     If the retrained model performs better, it replaces the old model.
@@ -109,10 +124,13 @@ def update_model_endpoint(city: str, model_name: str = None):
     Args:
         city (str): The name of the city for which the historical data is retrieved.
         model_name (str, optional): The name to save the updated model if it performs better.
+        authorization (str): The Bearer token from the request headers.
 
     Returns:
         dict: A message indicating whether the model was updated or not.
     """
+    verify_token(credentials)
+
     try:
         # Get the coordinates of the city
         spatial_data = get_coordinates(city)
@@ -120,26 +138,24 @@ def update_model_endpoint(city: str, model_name: str = None):
         # Get the date of two days ago and January 1st, 2010
         yesterday = datetime.datetime.now() - datetime.timedelta(days=2)
         yesterday = yesterday.strftime("%Y-%m-%d")
-        start_date = "2010-01-01"  # Fixed start date for 2010
+        start_date = "2010-01-01"
 
-        # Retrieve historical data using the get_history function
+        # Retrieve historical data
         history = get_history(spatial_data['lat'], spatial_data['lng'], start_date, yesterday)
-
         if not history:
             raise HTTPException(status_code=404, detail="Historical data could not be retrieved.")
 
-        # Create a DataFrame with the historical data
+        # Create DataFrame with historical data
         new_data = pd.DataFrame({'date': history['time'], 'temperature': history['temperature_2m']})
         new_data['date'] = pd.to_datetime(new_data['date'])
 
-        # Model and scaler file paths
+        # Model paths
         model_path = os.path.join(os.path.dirname(__file__), 'model', 'model_saved', 'saved_models.keras')
         scaler_path = os.path.join(os.path.dirname(__file__), 'model', 'model_saved', 'saved_models_scaler.pkl')
 
-        # Retrain and compare the LSTM model
+        # Retrain and compare
         history, model, scaler, model_updated = retrain_and_compare_LSTM(new_data, model_path, scaler_path, model_name=model_name)
 
-        # Return response
         if model_updated:
             return {"message": f"The model has been updated and saved under the name {model_name}.keras"}
         else:
