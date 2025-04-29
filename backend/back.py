@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends
+import threading
+
 
 app = FastAPI()
 SECRET_TOKEN = os.getenv("RETRAIN_TOKEN", "dev_token")
@@ -110,56 +112,39 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if token != "mon_token_ultra_secret":
         raise HTTPException(status_code=401, detail="Invalid or missing token")
 
-
-@app.post("/update_model")
-def update_model_endpoint(
-    city: str,
-    model_name: str = None,
-    credentials: HTTPAuthorizationCredentials = Depends(security) # ← récupère le header 'Authorization'
-):
-    """
-    Updates the LSTM model by retraining it with new historical data.
-    If the retrained model performs better, it replaces the old model.
-
-    Args:
-        city (str): The name of the city for which the historical data is retrieved.
-        model_name (str, optional): The name to save the updated model if it performs better.
-        authorization (str): The Bearer token from the request headers.
-
-    Returns:
-        dict: A message indicating whether the model was updated or not.
-    """
-    verify_token(credentials)
-
+def run_training(city: str, model_name: str = None):
     try:
-        # Get the coordinates of the city
         spatial_data = get_coordinates(city)
-
-        # Get the date of two days ago and January 1st, 2010
-        yesterday = datetime.datetime.now() - datetime.timedelta(days=2)
-        yesterday = yesterday.strftime("%Y-%m-%d")
+        yesterday = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime("%Y-%m-%d")
         start_date = "2010-01-01"
 
-        # Retrieve historical data
         history = get_history(spatial_data['lat'], spatial_data['lng'], start_date, yesterday)
         if not history:
-            raise HTTPException(status_code=404, detail="Historical data could not be retrieved.")
+            print("No historical data found.")
+            return
 
-        # Create DataFrame with historical data
         new_data = pd.DataFrame({'date': history['time'], 'temperature': history['temperature_2m']})
         new_data['date'] = pd.to_datetime(new_data['date'])
 
-        # Model paths
         model_path = os.path.join(os.path.dirname(__file__), 'model', 'model_saved', 'saved_models.keras')
         scaler_path = os.path.join(os.path.dirname(__file__), 'model', 'model_saved', 'saved_models_scaler.pkl')
 
-        # Retrain and compare
-        history, model, scaler, model_updated = retrain_and_compare_LSTM(new_data, model_path, scaler_path, model_name=model_name)
+        _, _, _, model_updated = retrain_and_compare_LSTM(new_data, model_path, scaler_path, model_name=model_name)
 
-        if model_updated:
-            return {"message": f"The model has been updated and saved under the name {model_name}.keras"}
-        else:
-            return {"message": "The existing model is already better, no update was made."}
+        print("✅ Model updated!" if model_updated else "ℹ️ No update needed.")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+        print(f"❌ Error during background training: {str(e)}")
+
+
+@app.post("/update_model_async")
+def update_model_async(
+    city: str,
+    model_name: str = None,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    verify_token(credentials)
+    thread = threading.Thread(target=run_training, args=(city, model_name))
+    thread.start()
+
+    return {"message": "Training started in the background. You can continue using the API."}
